@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tin Nóng 24h</title>
+<title>Tổng Hợp Tin Nổi Bật</title>
 
 <style>
 :root{
-    --bg:#f4f4f4;
-    --card:#fff;
+    --bg:#f5f5f5;
+    --card:#ffffff;
     --text:#111;
-    --primary:#007bff;
+    --primary:#c62828;
 }
 
 .dark{
     --bg:#121212;
     --card:#1e1e1e;
     --text:#eee;
-    --primary:#4da3ff;
+    --primary:#ff5252;
 }
 
 body{
     margin:0;
-    font-family:Arial, sans-serif;
+    font-family:Arial, Helvetica, sans-serif;
     background:var(--bg);
     color:var(--text);
     transition:0.3s;
@@ -35,35 +35,60 @@ header{
     text-align:center;
 }
 
-.controls{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    padding:20px;
-    flex-wrap:wrap;
+header h1{
+    margin:0;
 }
 
-input, button, select{
-    padding:10px;
-    border-radius:5px;
-    border:1px solid #ccc;
+.total-views{
+    margin-top:8px;
+    font-size:14px;
+    opacity:0.9;
+}
+
+.controls{
+    text-align:center;
+    padding:15px;
 }
 
 button{
+    padding:8px 14px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
     background:var(--primary);
     color:white;
-    border:none;
-    cursor:pointer;
 }
 
 button:hover{
-    opacity:0.8;
+    opacity:0.85;
 }
 
+/* BÀI NỔI BẬT */
+.featured{
+    width:90%;
+    max-width:1100px;
+    margin:20px auto;
+    background:var(--card);
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+.featured img{
+    width:100%;
+    height:350px;
+    object-fit:cover;
+}
+
+.featured-content{
+    padding:20px;
+}
+
+/* DANH SÁCH BÀI */
 .container{
     width:90%;
-    max-width:1200px;
-    margin:auto;
+    max-width:1100px;
+    margin:20px auto;
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
     gap:20px;
@@ -72,8 +97,8 @@ button:hover{
 .card{
     background:var(--card);
     border-radius:10px;
-    box-shadow:0 4px 8px rgba(0,0,0,0.1);
     overflow:hidden;
+    box-shadow:0 4px 8px rgba(0,0,0,0.1);
     transition:0.3s;
 }
 
@@ -91,10 +116,12 @@ button:hover{
     padding:15px;
 }
 
-.loader{
+footer{
+    margin-top:40px;
+    background:#111;
+    color:white;
     text-align:center;
-    font-size:18px;
-    padding:30px;
+    padding:20px;
 }
 </style>
 </head>
@@ -102,108 +129,141 @@ button:hover{
 <body>
 
 <header>
-<h1>TIN NÓNG 24H</h1>
-<p>Tổng hợp các bài báo đáng chú ý</p>
+    <h1>TỔNG HỢP TIN NỔI BẬT</h1>
+    <div class="total-views" id="totalViews"></div>
 </header>
 
 <div class="controls">
-<input type="text" id="searchInput" placeholder="Tìm kiếm (ví dụ: Trung Đông)">
-<button onclick="searchNews()">Tìm</button>
-
-<select id="categorySelect" onchange="getNews()">
-<option value="general">Chung</option>
-<option value="world">Thế giới</option>
-<option value="business">Kinh tế</option>
-<option value="technology">Công nghệ</option>
-</select>
-
-<button onclick="toggleDark()">🌙 Dark Mode</button>
+    <button onclick="toggleDark()">🌙 Dark Mode</button>
 </div>
 
-<div class="loader" id="loader"></div>
+<div id="featured-container"></div>
 <div class="container" id="news-container"></div>
+
+<footer>
+    © 2026 Tổng Hợp Tin | Chỉ tổng hợp & dẫn nguồn báo chí
+</footer>
 
 <script>
 
 const news = [
-    {
-        title: "Cập nhật chiến sự Trung Đông mới nhất",
-        description: "Diễn biến mới liên quan đến căng thẳng khu vực Trung Đông.",
-        image: "https://source.unsplash.com/600x400/?middle-east",
-        link: "https://vnexpress.net/chien-su-trung-dong-4750000.html"
-    },
-    {
-        title: "Phân tích xung đột Israel - Hamas",
-        description: "Các chuyên gia nhận định về tình hình hiện tại.",
-        image: "https://source.unsplash.com/600x400/?war",
-        link: "https://www.bbc.com/news/world-middle-east"
-    },
-    {
-        title: "Giá dầu thế giới biến động do bất ổn địa chính trị",
-        description: "Thị trường năng lượng chịu tác động từ chiến sự.",
-        image: "https://source.unsplash.com/600x400/?oil",
-        link: "https://www.reuters.com/markets/commodities/"
-    },
-    {
-        title: "Kinh tế toàn cầu trước nguy cơ suy thoái",
-        description: "Các nền kinh tế lớn đối mặt thách thức tăng trưởng.",
-        image: "https://source.unsplash.com/600x400/?economy",
-        link: "https://www.cnn.com/business"
-    },
-    {
-        title: "Công nghệ AI tiếp tục phát triển mạnh",
-        description: "Nhiều công ty đầu tư mạnh vào trí tuệ nhân tạo.",
-        image: "https://source.unsplash.com/600x400/?technology",
-        link: "https://techcrunch.com/"
-    },
-    {
-        title: "Tình hình Biển Đông được quan tâm",
-        description: "Các diễn biến mới về an ninh khu vực.",
-        image: "https://source.unsplash.com/600x400/?sea",
-        link: "https://tuoitre.vn/"
-    }
+{
+    title:"Chiến sự Trung Đông tiếp tục leo thang",
+    description:"Căng thẳng khu vực Trung Đông gia tăng với nhiều diễn biến mới.",
+    image:"https://images.unsplash.com/photo-1504711434969-e33886168f5c",
+    link:"https://www.bbc.com/news"
+},
+{
+    title:"Giá dầu thế giới tăng mạnh do bất ổn",
+    description:"Thị trường năng lượng phản ứng trước tình hình địa chính trị.",
+    image:"https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0",
+    link:"https://www.reuters.com/"
+},
+{
+    title:"Kinh tế toàn cầu trước nguy cơ suy thoái",
+    description:"Các chuyên gia cảnh báo về tăng trưởng chậm lại.",
+    image:"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40",
+    link:"https://edition.cnn.com/business"
+},
+{
+    title:"AI bùng nổ trong năm 2026",
+    description:"Doanh nghiệp công nghệ đầu tư mạnh vào trí tuệ nhân tạo.",
+    image:"https://images.unsplash.com/photo-1518770660439-4636190af475",
+    link:"https://techcrunch.com/"
+},
+{
+    title:"Biển Đông thu hút sự quan tâm quốc tế",
+    description:"Diễn biến an ninh khu vực được theo dõi sát sao.",
+    image:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    link:"https://tuoitre.vn/"
+}
 ];
 
-const container = document.getElementById("news-container");
+if(!localStorage.getItem("totalViews")){
+    localStorage.setItem("totalViews",0);
+}
 
-news.forEach((item, index) => {
+function updateTotal(){
+    document.getElementById("totalViews").innerText=
+        "👁️ Tổng lượt xem toàn website: "+localStorage.getItem("totalViews");
+}
+updateTotal();
 
-    const articleId = item.link;
+const featuredContainer=document.getElementById("featured-container");
+const container=document.getElementById("news-container");
 
-    if(!localStorage.getItem(articleId)){
-        localStorage.setItem(articleId, 0);
+/* BÀI ĐẦU LÀ BÀI NỔI BẬT */
+const featured=news[0];
+
+if(!localStorage.getItem(featured.link)){
+    localStorage.setItem(featured.link,0);
+}
+
+featuredContainer.innerHTML=`
+<div class="featured">
+    <img src="${featured.image}">
+    <div class="featured-content">
+        <h2>${featured.title}</h2>
+        <p>${featured.description}</p>
+        <p>👁️ Lượt xem: 
+            <span id="view-featured">
+            ${localStorage.getItem(featured.link)}
+            </span>
+        </p>
+        <button onclick="increaseView('${featured.link}','featured')">
+            Đọc nguồn
+        </button>
+    </div>
+</div>
+`;
+
+/* CÁC BÀI CÒN LẠI */
+news.slice(1).forEach((item,index)=>{
+
+    if(!localStorage.getItem(item.link)){
+        localStorage.setItem(item.link,0);
     }
 
-    container.innerHTML += `
-        <div class="card">
-            <img src="${item.image}">
-            <div class="card-content">
-                <h3>${item.title}</h3>
-                <p>${item.description}</p>
-                <p>👁️ Lượt xem:
-                    <span id="view-${index}">
-                        ${localStorage.getItem(articleId)}
-                    </span>
-                </p>
-                <button onclick="increaseView('${articleId}', ${index}, '${item.link}')">
-                    Đọc nguồn
-                </button>
-            </div>
+    container.innerHTML+=`
+    <div class="card">
+        <img src="${item.image}">
+        <div class="card-content">
+            <h3>${item.title}</h3>
+            <p>${item.description}</p>
+            <p>👁️ Lượt xem: 
+                <span id="view-${index}">
+                ${localStorage.getItem(item.link)}
+                </span>
+            </p>
+            <button onclick="increaseView('${item.link}',${index})">
+                Đọc nguồn
+            </button>
         </div>
+    </div>
     `;
 });
 
-function increaseView(articleId, index, url){
-    let views = parseInt(localStorage.getItem(articleId));
+function increaseView(link,id){
+    let views=parseInt(localStorage.getItem(link));
     views++;
-    localStorage.setItem(articleId, views);
+    localStorage.setItem(link,views);
 
-    let total = parseInt(localStorage.getItem("totalViews") || 0);
+    let total=parseInt(localStorage.getItem("totalViews"));
     total++;
-    localStorage.setItem("totalViews", total);
+    localStorage.setItem("totalViews",total);
 
-    document.getElementById("view-" + index).innerText = views;
-    window.open(url, "_blank");
+    if(id==="featured"){
+        document.getElementById("view-featured").innerText=views;
+    }else{
+        document.getElementById("view-"+id).innerText=views;
+    }
+
+    updateTotal();
+    window.open(link,"_blank");
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
 }
 
 </script>
