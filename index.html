@@ -125,64 +125,86 @@ button:hover{
 
 <script>
 
-const apiKey = "YOUR_GNEWS_API_KEY"; 
+const news = [
+    {
+        title: "Cập nhật chiến sự Trung Đông mới nhất",
+        description: "Diễn biến mới liên quan đến căng thẳng khu vực Trung Đông.",
+        image: "https://source.unsplash.com/600x400/?middle-east",
+        link: "https://vnexpress.net/chien-su-trung-dong-4750000.html"
+    },
+    {
+        title: "Phân tích xung đột Israel - Hamas",
+        description: "Các chuyên gia nhận định về tình hình hiện tại.",
+        image: "https://source.unsplash.com/600x400/?war",
+        link: "https://www.bbc.com/news/world-middle-east"
+    },
+    {
+        title: "Giá dầu thế giới biến động do bất ổn địa chính trị",
+        description: "Thị trường năng lượng chịu tác động từ chiến sự.",
+        image: "https://source.unsplash.com/600x400/?oil",
+        link: "https://www.reuters.com/markets/commodities/"
+    },
+    {
+        title: "Kinh tế toàn cầu trước nguy cơ suy thoái",
+        description: "Các nền kinh tế lớn đối mặt thách thức tăng trưởng.",
+        image: "https://source.unsplash.com/600x400/?economy",
+        link: "https://www.cnn.com/business"
+    },
+    {
+        title: "Công nghệ AI tiếp tục phát triển mạnh",
+        description: "Nhiều công ty đầu tư mạnh vào trí tuệ nhân tạo.",
+        image: "https://source.unsplash.com/600x400/?technology",
+        link: "https://techcrunch.com/"
+    },
+    {
+        title: "Tình hình Biển Đông được quan tâm",
+        description: "Các diễn biến mới về an ninh khu vực.",
+        image: "https://source.unsplash.com/600x400/?sea",
+        link: "https://tuoitre.vn/"
+    }
+];
+
 const container = document.getElementById("news-container");
-const loader = document.getElementById("loader");
 
-async function getNews(){
-    const category = document.getElementById("categorySelect").value;
-    loader.innerText = "Đang tải tin...";
-    container.innerHTML = "";
+news.forEach((item, index) => {
 
-    const url = https://gnews.io/api/v4/top-headlines?category=${category}&lang=vi&max=9&apikey=${apiKey};
-    
-    const res = await fetch(url);
-    const data = await res.json();
-    displayNews(data.articles);
-}
+    const articleId = item.link;
 
-async function searchNews(){
-    const query = document.getElementById("searchInput").value;
-    if(!query) return;
-
-    loader.innerText = "Đang tìm kiếm...";
-    container.innerHTML = "";
-
-    const url = https://gnews.io/api/v4/search?q=${query}&lang=vi&max=9&apikey=${apiKey};
-    
-    const res = await fetch(url);
-    const data = await res.json();
-    displayNews(data.articles);
-}
-
-function displayNews(articles){
-    loader.innerText = "";
-    if(!articles){
-        container.innerHTML = "<p>Không có dữ liệu</p>";
-        return;
+    if(!localStorage.getItem(articleId)){
+        localStorage.setItem(articleId, 0);
     }
 
-    articles.forEach(article=>{
-        container.innerHTML += `
+    container.innerHTML += `
         <div class="card">
-            <img src="${article.image || 'https://via.placeholder.com/400'}">
+            <img src="${item.image}">
             <div class="card-content">
-                <h3>${article.title}</h3>
-                <p>${article.description || ''}</p>
-                <a href="${article.url}" target="_blank">
-                    <button>Đọc nguồn</button>
-                </a>
+                <h3>${item.title}</h3>
+                <p>${item.description}</p>
+                <p>👁️ Lượt xem:
+                    <span id="view-${index}">
+                        ${localStorage.getItem(articleId)}
+                    </span>
+                </p>
+                <button onclick="increaseView('${articleId}', ${index}, '${item.link}')">
+                    Đọc nguồn
+                </button>
             </div>
         </div>
-        `;
-    });
-}
+    `;
+});
 
-function toggleDark(){
-    document.body.classList.toggle("dark");
-}
+function increaseView(articleId, index, url){
+    let views = parseInt(localStorage.getItem(articleId));
+    views++;
+    localStorage.setItem(articleId, views);
 
-getNews();
+    let total = parseInt(localStorage.getItem("totalViews") || 0);
+    total++;
+    localStorage.setItem("totalViews", total);
+
+    document.getElementById("view-" + index).innerText = views;
+    window.open(url, "_blank");
+}
 
 </script>
 
