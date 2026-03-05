@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tin Nóng 24h</title>
+
+<style>
+:root{
+    --bg:#f4f4f4;
+    --card:#fff;
+    --text:#111;
+    --primary:#007bff;
+}
+
+.dark{
+    --bg:#121212;
+    --card:#1e1e1e;
+    --text:#eee;
+    --primary:#4da3ff;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:0.3s;
+}
+
+header{
+    background:#111;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+.controls{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    padding:20px;
+    flex-wrap:wrap;
+}
+
+input, button, select{
+    padding:10px;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+
+button{
+    background:var(--primary);
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:0.8;
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:var(--card);
+    border-radius:10px;
+    box-shadow:0 4px 8px rgba(0,0,0,0.1);
+    overflow:hidden;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.card img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+}
+
+.card-content{
+    padding:15px;
+}
+
+.loader{
+    text-align:center;
+    font-size:18px;
+    padding:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>TIN NÓNG 24H</h1>
+<p>Tổng hợp các bài báo đáng chú ý</p>
+</header>
+
+<div class="controls">
+<input type="text" id="searchInput" placeholder="Tìm kiếm (ví dụ: Trung Đông)">
+<button onclick="searchNews()">Tìm</button>
+
+<select id="categorySelect" onchange="getNews()">
+<option value="general">Chung</option>
+<option value="world">Thế giới</option>
+<option value="business">Kinh tế</option>
+<option value="technology">Công nghệ</option>
+</select>
+
+<button onclick="toggleDark()">🌙 Dark Mode</button>
+</div>
+
+<div class="loader" id="loader"></div>
+<div class="container" id="news-container"></div>
+
+<script>
+
+const apiKey = "YOUR_GNEWS_API_KEY"; 
+const container = document.getElementById("news-container");
+const loader = document.getElementById("loader");
+
+async function getNews(){
+    const category = document.getElementById("categorySelect").value;
+    loader.innerText = "Đang tải tin...";
+    container.innerHTML = "";
+
+    const url = https://gnews.io/api/v4/top-headlines?category=${category}&lang=vi&max=9&apikey=${apiKey};
+    
+    const res = await fetch(url);
+    const data = await res.json();
+    displayNews(data.articles);
+}
+
+async function searchNews(){
+    const query = document.getElementById("searchInput").value;
+    if(!query) return;
+
+    loader.innerText = "Đang tìm kiếm...";
+    container.innerHTML = "";
+
+    const url = https://gnews.io/api/v4/search?q=${query}&lang=vi&max=9&apikey=${apiKey};
+    
+    const res = await fetch(url);
+    const data = await res.json();
+    displayNews(data.articles);
+}
+
+function displayNews(articles){
+    loader.innerText = "";
+    if(!articles){
+        container.innerHTML = "<p>Không có dữ liệu</p>";
+        return;
+    }
+
+    articles.forEach(article=>{
+        container.innerHTML += `
+        <div class="card">
+            <img src="${article.image || 'https://via.placeholder.com/400'}">
+            <div class="card-content">
+                <h3>${article.title}</h3>
+                <p>${article.description || ''}</p>
+                <a href="${article.url}" target="_blank">
+                    <button>Đọc nguồn</button>
+                </a>
+            </div>
+        </div>
+        `;
+    });
+}
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+
+getNews();
+
+</script>
+
+</body>
+</html>
